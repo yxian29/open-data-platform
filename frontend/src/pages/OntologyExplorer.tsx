@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import ForceGraph2D from 'react-force-graph-2d'
 import { listObjectTypes, createObjectType, deleteObjectType, getOntologyGraph, addProperty, deleteProperty, listDatasets, mapDataset } from '../api/client'
@@ -90,6 +90,14 @@ export default function OntologyExplorer() {
 
   const graphContainerRef = useRef<HTMLDivElement>(null)
   const fgRef = useRef<any>(null)
+
+  useEffect(() => {
+    const fg = fgRef.current
+    if (!fg) return
+    fg.d3Force('charge').strength(-500)
+    fg.d3Force('link').distance(160)
+    fg.d3ReheatSimulation()
+  }, [graphNodes.length])
 
   const paintNode = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const isSelected = node.id === selectedTypeId
@@ -309,6 +317,9 @@ export default function OntologyExplorer() {
               linkDirectionalArrowRelPos={1}
               onNodeClick={handleNodeClick}
               backgroundColor="#030712"
+              warmupTicks={80}
+              cooldownTicks={0}
+              d3VelocityDecay={0.4}
               nodeLabel={(n: any) => `${n.name} (${n.propCount} properties)`}
             />
           )}
