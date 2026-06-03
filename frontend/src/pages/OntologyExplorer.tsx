@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useRef, useCallback } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import ForceGraph2D from 'react-force-graph-2d'
 import { listObjectTypes, createObjectType, deleteObjectType, getOntologyGraph, addProperty, deleteProperty, listDatasets, mapDataset } from '../api/client'
 import { Plus, Trash2, GitBranch, Link } from 'lucide-react'
 
@@ -75,6 +76,52 @@ export default function OntologyExplorer() {
   const datasets = datasetsData?.data ?? []
   const graph = graphData?.data ?? { nodes: [], edges: [] }
   const selectedType = types.find((t: any) => t.id === selectedTypeId) || null
+
+  const graphNodes = (graph.nodes ?? []).map((n: any) => ({
+    id: n.id,
+    name: n.name,
+    propCount: n.properties?.length ?? 0,
+  }))
+  const graphLinks = (graph.edges ?? []).map((e: any) => ({
+    source: e.source,
+    target: e.target,
+    label: e.name ?? '',
+  }))
+
+  const graphContainerRef = useRef<HTMLDivElement>(null)
+  const fgRef = useRef<any>(null)
+
+  const paintNode = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
+    const isSelected = node.id === selectedTypeId
+    const radius = 20
+    const fontSize = Math.max(10, 14 / globalScale)
+
+    ctx.beginPath()
+    ctx.arc(node.x, node.y, radius, 0, 2 * Math.PI)
+    ctx.fillStyle = isSelected ? '#2563eb' : '#6366f1'
+    ctx.fill()
+    if (isSelected) {
+      ctx.strokeStyle = '#93c5fd'
+      ctx.lineWidth = 3 / globalScale
+      ctx.stroke()
+    }
+
+    ctx.font = `bold ${fontSize}px Sans-Serif`
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText(node.name, node.x, node.y)
+
+    if (globalScale > 1.2) {
+      ctx.font = `${fontSize * 0.75}px Sans-Serif`
+      ctx.fillStyle = 'rgba(255,255,255,0.7)'
+      ctx.fillText(`${node.propCount} props`, node.x, node.y + fontSize)
+    }
+  }, [selectedTypeId])
+
+  const handleNodeClick = useCallback((node: any) => {
+    setSelectedTypeId(node.id)
+  }, [])
 
   return (
     <div>
@@ -231,16 +278,45 @@ export default function OntologyExplorer() {
         </div>
       </div>
 
-      {/* Graph Visualization Placeholder */}
-      {graph.nodes.length > 0 && (
-        <div className="mt-6 bg-white rounded-xl shadow-sm border p-4">
-          <h2 className="font-semibold mb-3">Type Graph</h2>
-          <div className="bg-gray-50 rounded-lg p-8 text-center text-gray-500">
-            <p>{graph.nodes.length} nodes, {graph.edges.length} edges</p>
-            <p className="text-xs mt-1">Full graph visualization available with react-force-graph</p>
-          </div>
+      {/* Graph Visualization */}
+      <div className="mt-6 bg-white rounded-xl shadow-sm border p-4">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold">Type Graph</h2>
+          <span className="text-xs text-gray-400">{graphNodes.length} types · {graphLinks.length} relationships</span>
         </div>
-      )}
+        <div ref={graphContainerRef} className="rounded-lg overflow-hidden bg-gray-950" style={{ height: 420 }}>
+          {graphNodes.length === 0 ? (
+            <div className="h-full flex items-center justify-center text-gray-500 text-sm">
+              No object types yet — create one to see the graph
+            </div>
+          ) : (
+            <ForceGraph2D
+              ref={fgRef}
+              width={graphContainerRef.current?.offsetWidth ?? 800}
+              height={420}
+              graphData={{ nodes: graphNodes, links: graphLinks }}
+              nodeCanvasObject={paintNode}
+              nodeCanvasObjectMode={() => 'replace'}
+              nodePointerAreaPaint={(node: any, color, ctx) => {
+                ctx.beginPath()
+                ctx.arc(node.x, node.y, 20, 0, 2 * Math.PI)
+                ctx.fillStyle = color
+                ctx.fill()
+              }}
+              linkColor={() => '#6b7280'}
+              linkWidth={1.5}
+              linkDirectionalArrowLength={8}
+              linkDirectionalArrowRelPos={1}
+              onNodeClick={handleNodeClick}
+              backgroundColor="#030712"
+              nodeLabel={(n: any) => `${n.name} (${n.propCount} properties)`}
+            />
+          )}
+        </div>
+        {graphNodes.length > 0 && (
+          <p className="text-xs text-gray-400 mt-2">Click a node to inspect · Drag to rearrange · Scroll to zoom</p>
+        )}
+      </div>
 
       {/* Create Modal */}
       {showCreate && (
@@ -287,7 +363,6 @@ export default function OntologyExplorer() {
             <h3 className="font-semibold mb-1">Map Dataset to {selectedType.name}</h3>
             <p className="text-sm text-gray-500 mb-4">Connect a dataset's columns to this type's properties</p>
 
-            {/* Dataset Selector */}
             <div className="mb-4">
               <label className="block text-sm font-medium mb-1">Select Dataset</label>
               <select
@@ -307,7 +382,6 @@ export default function OntologyExplorer() {
               </select>
             </div>
 
-            {/* Column Mapping Table */}
             {selectedDatasetId && (() => {
               const dataset = datasets.find((ds: any) => ds.id === selectedDatasetId)
               const columns = dataset?.schema_info?.columns || []
@@ -356,7 +430,6 @@ export default function OntologyExplorer() {
                     </tbody>
                   </table>
 
-                  {/* Auto-map button */}
                   <button
                     onClick={() => {
                       const autoMap: Record<string, string> = {}
@@ -373,7 +446,6 @@ export default function OntologyExplorer() {
                     Auto-map matching names
                   </button>
 
-                  {/* Summary */}
                   {Object.keys(columnMappings).length > 0 && (
                     <div className="mt-3 p-2 bg-green-50 rounded text-xs text-green-700">
                       {Object.keys(columnMappings).length} of {columns.length} columns mapped
@@ -385,7 +457,6 @@ export default function OntologyExplorer() {
               )
             })()}
 
-            {/* Actions */}
             <div className="flex gap-2 justify-end mt-4">
               <button onClick={() => setShowMapping(false)} className="px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-lg">
                 Cancel
