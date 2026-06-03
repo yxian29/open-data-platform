@@ -1,0 +1,11 @@
+id,name,email,country,created_at
+1,Alice Johnson,alice@example.com,USA,2024-01-15
+2,Bob Smith,bob@example.com,UK,2024-02-20
+3,Charlie Brown,charlie@example.com,Canada,2024-03-10
+4,Diana Prince,diana@example.com,USA,2024-04-05
+5,Eve Wilson,eve@example.com,Germany,2024-05-12
+6,Frank Castle,frank@example.com,USA,2024-06-01
+7,Grace Lee,grace@example.com,Japan,2024-06-15
+8,Hank Pym,hank@example.com,UK,2024-07-22
+9,Iris West,iris@example.com,Canada,2024-08-30
+10,Jack Reacher,jack@example.com,Australia,2024-09-14

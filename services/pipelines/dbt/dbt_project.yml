@@ -1,0 +1,20 @@
+name: 'odp_transforms'
+version: '1.0.0'
+
+profile: 'odp'
+
+model-paths: ["models"]
+analysis-paths: ["analyses"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  odp_transforms:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table

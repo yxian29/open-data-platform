@@ -1,0 +1,16 @@
+id,customer_id,product_id,quantity,total_amount,status,order_date
+1,1,1,2,59.98,completed,2024-03-01
+2,1,3,1,149.99,completed,2024-04-15
+3,2,2,1,29.99,completed,2024-03-20
+4,3,1,3,89.97,completed,2024-05-10
+5,4,4,1,199.99,shipped,2024-06-01
+6,5,2,2,59.98,completed,2024-06-20
+7,6,3,1,149.99,processing,2024-07-05
+8,7,5,1,399.99,completed,2024-07-18
+9,8,1,1,29.99,shipped,2024-08-01
+10,9,4,2,399.98,completed,2024-08-15
+11,10,2,3,89.97,completed,2024-09-01
+12,1,5,1,399.99,processing,2024-09-20
+13,3,3,2,299.98,completed,2024-10-05
+14,5,1,4,119.96,shipped,2024-10-25
+15,7,4,1,199.99,completed,2024-11-10

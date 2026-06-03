@@ -1,0 +1,216 @@
+services:
+  # --- Infrastructure ---
+  # All images pulled from Bloomberg internal Artifactory registry (artprod.dev.bloomberg.com)
+
+  postgres:
+    image: artprod.dev.bloomberg.com/bb-dbinf/postgres:17.5
+    environment:
+      PGPORT: "5432"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/bb/db/postgres/data001
+      - ./infrastructure/init-scripts://db-initialize-scripts
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -p 5432"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  minio:
+    image: artprod.dev.bloomberg.com/bb-rapidci/minio:local
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin_secret}
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: artprod.dev.bloomberg.com/redis:latest
+    command: odp-cache
+    environment:
+      - REDIS_HOST=redis
+      - ORTHUS=0
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  neo4j:
+    image: artprod.dev.bloomberg.com/db-guild-graph-db-group/neo4j-community:5.26.7
+    environment:
+      NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j_secret}
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:7474/ || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 15s
+
+  clickhouse:
+    image: artprod.dev.bloomberg.com/clickhouseinfra/external/docker.io/clickhouse/clickhouse-server:25.11
+    environment:
+      CLICKHOUSE_DB: ${CLICKHOUSE_DB:-odp}
+      CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
+      CLICKHOUSE_PASSWORD: ${CLICKHOUSE_PASSWORD:-clickhouse_secret}
+    ports:
+      - "8123:8123"
+      - "9009:9000"
+    volumes:
+      - clickhouse_data:/var/lib/clickhouse
+      - ./infrastructure/clickhouse-init:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD", "clickhouse-client", "--query", "SELECT 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # --- Application Services ---
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: services/api-gateway/Dockerfile
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./services/api-gateway/src:/app/src
+      - ./shared:/app/shared
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      neo4j:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ontology-service:
+    build:
+      context: .
+      dockerfile: services/ontology/Dockerfile
+    env_file: .env
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./services/ontology/src:/app/src
+      - ./shared:/app/shared
+    depends_on:
+      neo4j:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+
+  pipeline-service:
+    build:
+      context: .
+      dockerfile: services/pipelines/Dockerfile
+    env_file: .env
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./services/pipelines/src:/app/src
+      - ./shared:/app/shared
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+
+  dagster-webserver:
+    build:
+      context: .
+      dockerfile: services/pipelines/Dockerfile
+    command: dagster-webserver -h 0.0.0.0 -p 3100 -w /app/dagster/workspace.yaml
+    env_file: .env
+    environment:
+      DAGSTER_HOME: /app/dagster
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./services/pipelines/dagster:/app/dagster
+      - ./shared:/app/shared
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  dagster-daemon:
+    build:
+      context: .
+      dockerfile: services/pipelines/Dockerfile
+    command: dagster-daemon run -w /app/dagster/workspace.yaml
+    env_file: .env
+    environment:
+      DAGSTER_HOME: /app/dagster
+    volumes:
+      - ./services/pipelines/dagster:/app/dagster
+      - ./shared:/app/shared
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend/src:/app/src
+    environment:
+      VITE_API_URL: http://localhost:8000
+    depends_on:
+      api-gateway:
+        condition: service_healthy
+
+  # --- Reverse Proxy ---
+
+  traefik:
+    image: artprod.dev.bloomberg.com/bb-bbds/local/traefik:local
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+    ports:
+      - "8888:80"
+      - "8080:8080"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+volumes:
+  postgres_data:
+  minio_data:
+  redis_data:
+  neo4j_data:
+  clickhouse_data:

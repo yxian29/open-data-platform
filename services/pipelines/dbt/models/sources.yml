@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: raw
+    database: odp
+    schema: default
+    tables:
+      - name: analytics_customers
+        description: "Raw customer data loaded from CSV"
+      - name: analytics_orders
+        description: "Raw order data loaded from CSV"
+      - name: analytics_products
+        description: "Raw product data loaded from CSV"

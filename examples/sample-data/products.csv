@@ -1,0 +1,6 @@
+id,name,category,price,stock,created_at
+1,Widget Pro,Electronics,29.99,150,2024-01-01
+2,Gadget Plus,Electronics,29.99,200,2024-01-15
+3,SuperTool X,Tools,149.99,75,2024-02-01
+4,MegaDevice,Electronics,199.99,50,2024-03-01
+5,UltraGear,Premium,399.99,25,2024-04-01
