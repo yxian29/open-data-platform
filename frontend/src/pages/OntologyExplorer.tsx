@@ -1,7 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import ForceGraph2D from 'react-force-graph-2d'
-import { listObjectTypes, createObjectType, deleteObjectType, getOntologyGraph, addProperty, deleteProperty, listDatasets, mapDataset } from '../api/client'
+import { listObjectTypes, createObjectType, deleteObjectType, getOntologyGraph, addProperty, deleteProperty, addLink, listDatasets, mapDataset } from '../api/client'
 import { Plus, Trash2, GitBranch, Link } from 'lucide-react'
 
 export default function OntologyExplorer() {
@@ -10,6 +10,7 @@ export default function OntologyExplorer() {
   const [newType, setNewType] = useState({ name: '', description: '' })
   const [selectedTypeId, setSelectedTypeId] = useState<string | null>(null)
   const [newProp, setNewProp] = useState({ name: '', data_type: 'string', required: false })
+  const [newLink, setNewLink] = useState({ name: '', target_type_id: '', cardinality: 'one-to-many' })
   const [showMapping, setShowMapping] = useState(false)
   const [selectedDatasetId, setSelectedDatasetId] = useState<string | null>(null)
   const [columnMappings, setColumnMappings] = useState<Record<string, string>>({})
@@ -60,6 +61,15 @@ export default function OntologyExplorer() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ['ontology-types'] })
       setNewProp({ name: '', data_type: 'string', required: false })
+    },
+  })
+
+  const addLinkMutation = useMutation({
+    mutationFn: ({ typeId, data }: { typeId: string; data: any }) => addLink(typeId, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ontology-types'] })
+      queryClient.invalidateQueries({ queryKey: ['ontology-graph'] })
+      setNewLink({ name: '', target_type_id: '', cardinality: 'one-to-many' })
     },
   })
 
@@ -266,16 +276,59 @@ export default function OntologyExplorer() {
                 </button>
               </div>
 
-              {selectedType.links?.length > 0 && (
-                <div className="mt-4">
-                  <h3 className="font-medium mb-2">Relationships</h3>
-                  {selectedType.links.map((link: any) => (
-                    <div key={link.id} className="text-sm text-gray-600">
-                      {link.name} → {link.target_type_name || link.target_type_id}
-                    </div>
-                  ))}
+              <div className="mt-6">
+                <h3 className="font-medium mb-2">Relationships</h3>
+                {(selectedType.links ?? []).length > 0 ? (
+                  <div className="space-y-1 mb-3">
+                    {selectedType.links.map((link: any) => (
+                      <div key={link.id} className="flex items-center gap-2 text-sm px-3 py-2 bg-gray-50 rounded-lg">
+                        <span className="font-medium text-purple-700">{selectedType.name}</span>
+                        <span className="text-gray-400 text-xs">──{link.name}──▶</span>
+                        <span className="font-medium text-purple-700">{link.target_type_name || link.target_type_id}</span>
+                        <span className="ml-auto text-xs text-gray-400 bg-white border rounded px-1.5 py-0.5">{link.cardinality}</span>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-sm text-gray-400 mb-3">No relationships defined yet.</p>
+                )}
+
+                <div className="flex gap-2 items-end flex-wrap">
+                  <input
+                    placeholder="Relationship name (e.g. placed_order)"
+                    value={newLink.name}
+                    onChange={(e) => setNewLink({ ...newLink, name: e.target.value })}
+                    className="flex-1 min-w-[160px] px-3 py-2 border rounded-lg text-sm"
+                  />
+                  <select
+                    value={newLink.target_type_id}
+                    onChange={(e) => setNewLink({ ...newLink, target_type_id: e.target.value })}
+                    className="px-3 py-2 border rounded-lg text-sm"
+                  >
+                    <option value="">→ Target type</option>
+                    {types.filter((t: any) => t.id !== selectedTypeId).map((t: any) => (
+                      <option key={t.id} value={t.id}>{t.name}</option>
+                    ))}
+                  </select>
+                  <select
+                    value={newLink.cardinality}
+                    onChange={(e) => setNewLink({ ...newLink, cardinality: e.target.value })}
+                    className="px-3 py-2 border rounded-lg text-sm"
+                  >
+                    <option value="one-to-one">One-to-one</option>
+                    <option value="one-to-many">One-to-many</option>
+                    <option value="many-to-one">Many-to-one</option>
+                    <option value="many-to-many">Many-to-many</option>
+                  </select>
+                  <button
+                    disabled={!newLink.name || !newLink.target_type_id || addLinkMutation.isPending}
+                    onClick={() => addLinkMutation.mutate({ typeId: selectedType.id, data: newLink })}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm hover:bg-purple-700 disabled:opacity-50"
+                  >
+                    {addLinkMutation.isPending ? 'Adding…' : 'Add'}
+                  </button>
                 </div>
-              )}
+              </div>
             </div>
           ) : (
             <div className="text-center text-gray-400 py-12">
