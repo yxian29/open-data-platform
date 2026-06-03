@@ -141,6 +141,32 @@ export default function OntologyExplorer() {
     setSelectedTypeId(node.id)
   }, [])
 
+  const paintLink = useCallback((link: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
+    const src = link.source
+    const tgt = link.target
+    if (!src || !tgt || typeof src !== 'object' || typeof tgt !== 'object') return
+    if (!link.label) return
+
+    const midX = (src.x + tgt.x) / 2
+    const midY = (src.y + tgt.y) / 2
+    const fontSize = Math.max(7, 11 / globalScale)
+
+    ctx.font = `${fontSize}px Sans-Serif`
+    const textWidth = ctx.measureText(link.label).width
+    const pad = 3 / globalScale
+
+    ctx.fillStyle = 'rgba(109, 40, 217, 0.85)'
+    const rounding = fontSize / 2 + pad
+    ctx.beginPath()
+    ctx.roundRect(midX - textWidth / 2 - pad, midY - fontSize / 2 - pad, textWidth + pad * 2, fontSize + pad * 2, rounding)
+    ctx.fill()
+
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillStyle = '#ffffff'
+    ctx.fillText(link.label, midX, midY)
+  }, [])
+
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
@@ -364,10 +390,17 @@ export default function OntologyExplorer() {
                 ctx.fillStyle = color
                 ctx.fill()
               }}
-              linkColor={() => '#6b7280'}
-              linkWidth={1.5}
-              linkDirectionalArrowLength={8}
-              linkDirectionalArrowRelPos={1}
+              linkCanvasObject={paintLink}
+              linkCanvasObjectMode={() => 'after'}
+              linkColor={() => '#7c3aed'}
+              linkWidth={2}
+              linkDirectionalArrowLength={12}
+              linkDirectionalArrowRelPos={0.88}
+              linkDirectionalArrowColor={() => '#a78bfa'}
+              linkDirectionalParticles={2}
+              linkDirectionalParticleWidth={3}
+              linkDirectionalParticleColor={() => '#c4b5fd'}
+              linkDirectionalParticleSpeed={0.005}
               onNodeClick={handleNodeClick}
               backgroundColor="#030712"
               warmupTicks={80}
