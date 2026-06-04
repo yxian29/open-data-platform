@@ -10,10 +10,10 @@ const navItems = [
   { to: '/ontology', icon: GitBranch, label: 'Ontology' },
   { to: '/pipelines', icon: Play, label: 'Pipelines' },
   { to: '/explorer', icon: Search, label: 'Data Explorer' },
-  { to: '/lineage', icon: GitMerge, label: 'Lineage' },
-  { to: '/classification', icon: Tag, label: 'Classification' },
-  { to: '/audit', icon: Shield, label: 'Audit Log' },
   { to: '/ai', icon: Bot, label: 'AI Assistant' },
+  // { to: '/lineage', icon: GitMerge, label: 'Lineage' },
+  // { to: '/classification', icon: Tag, label: 'Classification' },
+  // { to: '/audit', icon: Shield, label: 'Audit Log' },
 ]
 
 export default function Layout() {
