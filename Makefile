@@ -55,3 +55,7 @@ neo4j-shell:
 
 clickhouse-client:
 	docker compose exec clickhouse clickhouse-client --password clickhouse_secret
+
+# Phase 2 services
+logs-audit:
+	docker compose logs -f audit-service

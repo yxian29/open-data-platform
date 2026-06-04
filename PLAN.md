@@ -369,17 +369,15 @@ palantir-poc/
 | **Reverse Proxy** | Traefik | Auto-discovers Docker services, simple YAML config |
 | **Build Tool** | Vite | Fast HMR, native TypeScript support |
 
----
+### Phase 2 — Governance & Connectors (3-4 weeks)
+- Keycloak for enterprise RBAC (OIDC/SAML) - NICE-TO-HAVE
+- Airbyte integration for 300+ external source connectors - NICE-TO-HAVE
+- Column-level data lineage tracking - MUST-HAVE
+- Audit trail service (who accessed what, when) - MUST-HAVE
+- Data classification and marking system - MUST-HAVE
+- dbt tests and documentation - NICE-TO-HAVE
 
 ## Future Phases (designed for, not building now)
-
-### Phase 2 — Governance & Connectors (3-4 weeks)
-- Keycloak for enterprise RBAC (OIDC/SAML)
-- Airbyte integration for 300+ external source connectors
-- Column-level data lineage tracking
-- Audit trail service (who accessed what, when)
-- Data classification and marking system
-- dbt tests and documentation
 
 ### Phase 3 — Analytics & AI (3-4 weeks)
 - Apache Superset for dashboards and BI
