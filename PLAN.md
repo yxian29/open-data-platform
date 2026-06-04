@@ -379,13 +379,14 @@ palantir-poc/
 
 ## Future Phases (designed for, not building now)
 
-### Phase 3 — Analytics & AI (3-4 weeks)
+### Phase 3 — Analytics & AI (IN PROGRESS)
+- AI service (claude CLI bridge + ChromaDB + sentence-transformers) ✓
+  - Natural language to SQL (text-to-SQL) ✓
+  - Ontology-aware question answering (RAG) ✓
+  - Schema suggestion for new datasets ✓
+  - Data summarization ✓
+- AI Assistant frontend page ✓
 - Apache Superset for dashboards and BI
-- AI/LLM service (LangChain + Qdrant)
-  - Natural language to SQL (text-to-SQL)
-  - Ontology-aware question answering (RAG)
-  - Schema suggestion for new datasets
-  - Data summarization
 - Streamlit notebooks for ad-hoc analysis
 - GraphQL endpoint for ontology traversal
 

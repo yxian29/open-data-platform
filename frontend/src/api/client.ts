@@ -85,4 +85,14 @@ export const refreshLineage = () => api.post('/lineage/refresh')
 export const getImpactAnalysis = (table: string, column: string) =>
   api.get(`/lineage/impact/${table}/${column}`)
 
+// AI Assistant
+export const aiChat = (data: { query: string; session_id?: string }) =>
+  api.post('/ai/chat', data)
+export const aiSuggest = (data: { dataset_name: string; columns: { name: string; type?: string }[] }) =>
+  api.post('/ai/suggest', data)
+export const aiSummarize = (data: { dataset_name: string; table_name?: string; sample_rows?: number }) =>
+  api.post('/ai/summarize', data)
+export const getAiHistory = (sessionId: string) =>
+  api.get(`/ai/history/${sessionId}`)
+
 export default api

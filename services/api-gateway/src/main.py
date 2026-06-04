@@ -5,7 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from shared.db.postgres import get_pool, close_pool
 from shared.db.minio_client import ensure_bucket
-from src.routes import datasets, ontology, pipelines, auth, explorer, audit, classification, lineage
+from src.routes import datasets, ontology, pipelines, auth, explorer, audit, classification, lineage, ai
 from src.middleware.audit_mw import AuditMiddleware
 
 
@@ -40,6 +40,7 @@ app.include_router(explorer.router, prefix="/api/v1/explorer", tags=["Data Explo
 app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])
 app.include_router(classification.router, prefix="/api/v1/classification", tags=["Classification"])
 app.include_router(lineage.router, prefix="/api/v1/lineage", tags=["Lineage"])
+app.include_router(ai.router, prefix="/api/v1/ai", tags=["AI"])
 app.add_middleware(AuditMiddleware)
 
 

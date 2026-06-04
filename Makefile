@@ -59,3 +59,11 @@ clickhouse-client:
 # Phase 2 services
 logs-audit:
 	docker compose logs -f audit-service
+
+# Phase 3 — AI layer
+ai-bridge:
+	@echo "Starting Claude CLI bridge on :9999 (keep this terminal open)"
+	python3 claude-bridge.py
+
+logs-ai:
+	docker compose logs -f ai-service

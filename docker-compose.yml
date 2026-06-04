@@ -193,6 +193,22 @@ services:
       postgres:
         condition: service_healthy
 
+  ai-service:
+    build:
+      context: .
+      dockerfile: services/ai-service/Dockerfile
+    env_file: .env
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./services/ai-service/src:/app/src
+      - ./shared:/app/shared
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   frontend:
     build:
       context: ./frontend

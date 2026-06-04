@@ -8,6 +8,7 @@ import DataExplorer from './pages/DataExplorer'
 import AuditLog from './pages/AuditLog'
 import Classification from './pages/Classification'
 import Lineage from './pages/Lineage'
+import AIAssistant from './pages/AIAssistant'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="lineage" element={<Lineage />} />
           <Route path="classification" element={<Classification />} />
           <Route path="audit" element={<AuditLog />} />
+          <Route path="ai" element={<AIAssistant />} />
         </Route>
       </Routes>
     </BrowserRouter>
