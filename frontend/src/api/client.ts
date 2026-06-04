@@ -51,4 +51,38 @@ export const deletePipeline = (id: string) => api.delete(`/pipelines/${id}`)
 export const executeQuery = (query: string) =>
   api.post('/explorer/query', { query })
 
+// Audit
+export const listAuditEvents = (params: Record<string, any>) =>
+  api.get('/audit/events', { params })
+export const getAuditStats = (days = 7) =>
+  api.get('/audit/stats', { params: { days } })
+
+// Classification
+export const getDatasetClassifications = (datasetId: string) =>
+  api.get(`/classification/datasets/${datasetId}`)
+export const setClassification = (datasetId: string, data: any) =>
+  api.post(`/classification/datasets/${datasetId}`, data)
+export const autoDetectClassification = (datasetId: string) =>
+  api.post(`/classification/datasets/${datasetId}/auto-detect`)
+export const listClassificationRules = () =>
+  api.get('/classification/rules')
+export const createClassificationRule = (data: any) =>
+  api.post('/classification/rules', data)
+export const updateClassificationRule = (id: string, data: any) =>
+  api.put(`/classification/rules/${id}`, data)
+export const deleteClassificationRule = (id: string) =>
+  api.delete(`/classification/rules/${id}`)
+export const getClassificationSummary = () =>
+  api.get('/classification/summary')
+
+// Lineage
+export const getLineageGraph = () => api.get('/lineage/graph')
+export const getColumnLineage = (table: string, column: string) =>
+  api.get(`/lineage/column/${table}/${column}`)
+export const getDatasetLineage = (id: string) =>
+  api.get(`/lineage/dataset/${id}`)
+export const refreshLineage = () => api.post('/lineage/refresh')
+export const getImpactAnalysis = (table: string, column: string) =>
+  api.get(`/lineage/impact/${table}/${column}`)
+
 export default api

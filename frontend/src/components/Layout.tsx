@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import {
-  LayoutDashboard, Database, GitBranch, Play, Search
+  LayoutDashboard, Database, GitBranch, Play, Search,
+  Shield, Tag, GitMerge
 } from 'lucide-react'
 
 const navItems = [
@@ -9,6 +10,9 @@ const navItems = [
   { to: '/ontology', icon: GitBranch, label: 'Ontology' },
   { to: '/pipelines', icon: Play, label: 'Pipelines' },
   { to: '/explorer', icon: Search, label: 'Data Explorer' },
+  { to: '/lineage', icon: GitMerge, label: 'Lineage' },
+  { to: '/classification', icon: Tag, label: 'Classification' },
+  { to: '/audit', icon: Shield, label: 'Audit Log' },
 ]
 
 export default function Layout() {
@@ -39,7 +43,7 @@ export default function Layout() {
           ))}
         </nav>
         <div className="p-4 border-t border-gray-700 text-xs text-gray-500">
-          v0.1.0 - Phase 1 MVP
+          v0.2.0 - Phase 2
         </div>
       </aside>
       <main className="flex-1 overflow-auto">

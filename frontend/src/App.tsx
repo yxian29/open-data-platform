@@ -5,6 +5,9 @@ import Datasets from './pages/Datasets'
 import OntologyExplorer from './pages/OntologyExplorer'
 import Pipelines from './pages/Pipelines'
 import DataExplorer from './pages/DataExplorer'
+import AuditLog from './pages/AuditLog'
+import Classification from './pages/Classification'
+import Lineage from './pages/Lineage'
 
 export default function App() {
   return (
@@ -16,6 +19,9 @@ export default function App() {
           <Route path="ontology" element={<OntologyExplorer />} />
           <Route path="pipelines" element={<Pipelines />} />
           <Route path="explorer" element={<DataExplorer />} />
+          <Route path="lineage" element={<Lineage />} />
+          <Route path="classification" element={<Classification />} />
+          <Route path="audit" element={<AuditLog />} />
         </Route>
       </Routes>
     </BrowserRouter>
