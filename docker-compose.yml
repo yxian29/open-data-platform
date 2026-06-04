@@ -179,6 +179,20 @@ services:
       postgres:
         condition: service_healthy
 
+  audit-service:
+    build:
+      context: .
+      dockerfile: services/audit/Dockerfile
+    env_file: .env
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./services/audit/src:/app/src
+      - ./shared:/app/shared
+    depends_on:
+      postgres:
+        condition: service_healthy
+
   frontend:
     build:
       context: ./frontend

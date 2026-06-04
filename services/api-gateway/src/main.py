@@ -5,7 +5,8 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from shared.db.postgres import get_pool, close_pool
 from shared.db.minio_client import ensure_bucket
-from src.routes import datasets, ontology, pipelines, auth, explorer
+from src.routes import datasets, ontology, pipelines, auth, explorer, audit, classification, lineage
+from src.middleware.audit_mw import AuditMiddleware
 
 
 @asynccontextmanager
@@ -36,6 +37,10 @@ app.include_router(datasets.router, prefix="/api/v1/datasets", tags=["Datasets"]
 app.include_router(ontology.router, prefix="/api/v1/ontology", tags=["Ontology"])
 app.include_router(pipelines.router, prefix="/api/v1/pipelines", tags=["Pipelines"])
 app.include_router(explorer.router, prefix="/api/v1/explorer", tags=["Data Explorer"])
+app.include_router(audit.router, prefix="/api/v1/audit", tags=["Audit"])
+app.include_router(classification.router, prefix="/api/v1/classification", tags=["Classification"])
+app.include_router(lineage.router, prefix="/api/v1/lineage", tags=["Lineage"])
+app.add_middleware(AuditMiddleware)
 
 
 @app.get("/health")
