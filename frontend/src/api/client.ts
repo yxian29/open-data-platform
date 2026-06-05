@@ -82,8 +82,6 @@ export const getColumnLineage = (table: string, column: string) =>
 export const getDatasetLineage = (id: string) =>
   api.get(`/lineage/dataset/${id}`)
 export const refreshLineage = () => api.post('/lineage/refresh')
-export const getImpactAnalysis = (table: string, column: string) =>
-  api.get(`/lineage/impact/${table}/${column}`)
 
 // AI Assistant
 export const aiChat = (data: { query: string; session_id?: string }) =>

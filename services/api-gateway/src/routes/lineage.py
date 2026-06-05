@@ -103,37 +103,3 @@ async def refresh_lineage():
         resp = await client.post("http://pipeline-service:8002/lineage/refresh")
         resp.raise_for_status()
         return resp.json()
-
-
-@router.get("/impact/{table}/{column}")
-async def get_impact_analysis(table: str, column: str):
-    async with get_connection() as conn:
-        node = await conn.fetchrow(
-            "SELECT * FROM lineage_nodes WHERE table_name = $1 AND column_name = $2",
-            table, column,
-        )
-        if not node:
-            raise HTTPException(status_code=404, detail="Column not found in lineage graph")
-
-        downstream = await conn.fetch(
-            """
-            WITH RECURSIVE downstream AS (
-                SELECT e.target_node_id, 1 as depth
-                FROM lineage_edges e WHERE e.source_node_id = $1
-                UNION ALL
-                SELECT e.target_node_id, d.depth + 1
-                FROM lineage_edges e
-                JOIN downstream d ON e.source_node_id = d.target_node_id
-                WHERE d.depth < 10
-            )
-            SELECT DISTINCT n.* FROM downstream d
-            JOIN lineage_nodes n ON n.id = d.target_node_id
-            """,
-            node["id"],
-        )
-
-    return {
-        "source": {"table": table, "column": column},
-        "impacted": [dict(n) for n in downstream],
-        "impact_count": len(downstream),
-    }
