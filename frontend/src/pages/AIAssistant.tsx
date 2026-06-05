@@ -7,12 +7,14 @@ interface Message {
   content: string
   sql?: string
   rows?: Record<string, unknown>[]
+  cypher?: string
+  graphResult?: Record<string, unknown>[]
 }
 
 interface HistoryEntry {
   role: 'user' | 'assistant'
   content: string
-  metadata: { sql?: string | null }
+  metadata: { sql?: string | null; cypher?: string | null; graph_result?: Record<string, unknown>[] | null }
   created_at: string
 }
 
@@ -45,6 +47,8 @@ export default function AIAssistant() {
               content: h.content,
               sql: meta.sql ?? undefined,
               rows: meta.rows ?? undefined,
+              cypher: meta.cypher ?? undefined,
+              graphResult: meta.graph_result ?? undefined,
             }
           })
         })
@@ -78,6 +82,8 @@ export default function AIAssistant() {
         content: data.answer,
         sql: data.sql,
         rows: data.rows,
+        cypher: data.cypher,
+        graphResult: data.graph_result,
       }])
     } catch (e: any) {
       setMessages(m => [...m, {
@@ -141,6 +147,13 @@ export default function AIAssistant() {
                 </div>
               )}
 
+              {msg.cypher && (
+                <div className="mt-2 bg-gray-900 rounded-lg p-3 text-xs font-mono text-cyan-300 overflow-x-auto">
+                  <div className="text-gray-500 mb-1">Generated Cypher</div>
+                  {msg.cypher}
+                </div>
+              )}
+
               {msg.rows && msg.rows.length > 0 && (
                 <div className="mt-2 bg-white border rounded-lg overflow-hidden">
                   <div className="flex items-center gap-1 px-3 py-2 border-b bg-gray-50 text-xs text-gray-500">
@@ -164,6 +177,39 @@ export default function AIAssistant() {
                             {Object.values(row).map((v, vi) => (
                               <td key={vi} className="px-3 py-2 text-gray-700">
                                 {String(v ?? '')}
+                              </td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+
+              {msg.graphResult && msg.graphResult.length > 0 && (
+                <div className="mt-2 bg-white border border-cyan-200 rounded-lg overflow-hidden">
+                  <div className="flex items-center gap-1 px-3 py-2 border-b bg-cyan-50 text-xs text-cyan-700">
+                    <Table2 size={12} />
+                    {msg.graphResult.length} result{msg.graphResult.length !== 1 ? 's' : ''}
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs">
+                      <thead className="bg-cyan-50">
+                        <tr>
+                          {Object.keys(msg.graphResult[0]).map(col => (
+                            <th key={col} className="text-left px-3 py-2 font-medium text-cyan-800 border-b border-cyan-200">
+                              {col}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {msg.graphResult.map((row, ri) => (
+                          <tr key={ri} className="border-b border-cyan-100 last:border-0 hover:bg-cyan-50">
+                            {Object.values(row).map((v, vi) => (
+                              <td key={vi} className="px-3 py-2 text-gray-700">
+                                {typeof v === 'object' ? JSON.stringify(v) : String(v ?? '')}
                               </td>
                             ))}
                           </tr>

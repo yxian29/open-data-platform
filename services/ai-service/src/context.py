@@ -74,3 +74,36 @@ async def get_ontology_types() -> str:
 
     lines = [f"- {t.get('name', '?')}: {t.get('description', '')}" for t in types]
     return "\n".join(lines)
+
+
+async def get_ontology_graph() -> str:
+    """Return the full ontology type graph (types, properties, relationships) as structured text."""
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            resp = await client.get(f"{ONTOLOGY_SERVICE_URL}/api/v1/graph")
+            data = resp.json()
+    except Exception as e:
+        return f"(Could not fetch ontology graph: {e})"
+
+    nodes = data.get("nodes", [])
+    edges = data.get("edges", [])
+
+    if not nodes:
+        return "(No ontology types defined yet)"
+
+    node_map = {}
+    lines = ["Types:"]
+    for n in nodes:
+        node_map[n["id"]] = n["name"]
+        props = n.get("properties", [])
+        prop_str = ", ".join(f"{p['name']}({p['data_type']})" for p in props if p.get("name"))
+        lines.append(f"  - {n['name']}: {n.get('description', '')}  [properties: {prop_str or 'none'}]")
+
+    if edges:
+        lines.append("Relationships:")
+        for e in edges:
+            src = node_map.get(e["source"], e["source"])
+            tgt = node_map.get(e["target"], e["target"])
+            lines.append(f"  - {src} --[{e.get('name', '?')}]--> {tgt}")
+
+    return "\n".join(lines)
