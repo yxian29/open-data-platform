@@ -51,7 +51,7 @@
 
 **API Gateway (FastAPI):**
 - `services/api-gateway/src/main.py` — FastAPI app with CORS, health check
-- JWT-based authentication (simple, no Keycloak yet)
+- JWT-based authentication
 - Route modules for datasets, ontology, pipelines
 - Shared library: Pydantic models, DB clients (asyncpg, neo4j-driver, minio-py), config
 
@@ -370,7 +370,7 @@ palantir-poc/
 | **Build Tool** | Vite | Fast HMR, native TypeScript support |
 
 ### Phase 2 — Governance & Connectors (3-4 weeks)
-- Keycloak for enterprise RBAC (OIDC/SAML) - NICE-TO-HAVE
+- Enterprise RBAC with OIDC/SAML support - NICE-TO-HAVE
 - Airbyte integration for 300+ external source connectors - NICE-TO-HAVE
 - Column-level data lineage tracking - MUST-HAVE
 - Audit trail service (who accessed what, when) - MUST-HAVE

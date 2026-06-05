@@ -9,7 +9,7 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/bb/db/postgres/data001
+      - postgres_data:/var/lib/postgresql/data
       - ./infrastructure/init-scripts://db-initialize-scripts
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -p 5432"]

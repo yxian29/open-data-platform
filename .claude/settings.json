@@ -4,7 +4,9 @@
       "Bash(git fetch *)",
       "Bash(git reset *)",
       "Bash(git commit *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(sed -n '50,60p' /Users/yxian8/Workspace/yxian29/open-data-platform/PLAN.md)",
+      "Bash(sed -n '370,376p' /Users/yxian8/Workspace/yxian29/open-data-platform/PLAN.md)"
     ]
   }
 }
