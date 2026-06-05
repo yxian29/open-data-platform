@@ -1,4 +1,4 @@
-FROM artprod.dev.bloomberg.com/node:20-rhel8
+FROM node:20-alpine
 
 WORKDIR /app
 

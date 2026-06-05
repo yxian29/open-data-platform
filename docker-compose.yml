@@ -1,9 +1,9 @@
 services:
   # --- Infrastructure ---
-  # All images pulled from Bloomberg internal Artifactory registry (artprod.dev.bloomberg.com)
+  # All images pulled from public registries
 
   postgres:
-    image: artprod.dev.bloomberg.com/bb-dbinf/postgres:17.5
+    image: postgres:17.5
     environment:
       PGPORT: "5432"
     ports:
@@ -18,7 +18,7 @@ services:
       retries: 5
 
   minio:
-    image: artprod.dev.bloomberg.com/bb-rapidci/minio:local
+    image: minio/minio:latest
     environment:
       MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
       MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin_secret}
@@ -34,7 +34,7 @@ services:
       retries: 5
 
   redis:
-    image: artprod.dev.bloomberg.com/redis:latest
+    image: redis:latest
     command: odp-cache
     environment:
       - REDIS_HOST=redis
@@ -51,7 +51,7 @@ services:
       start_period: 10s
 
   neo4j:
-    image: artprod.dev.bloomberg.com/db-guild-graph-db-group/neo4j-community:5.26.7
+    image: neo4j:5.26.7-community
     environment:
       NEO4J_AUTH: ${NEO4J_USER:-neo4j}/${NEO4J_PASSWORD:-neo4j_secret}
     ports:
@@ -67,7 +67,7 @@ services:
       start_period: 15s
 
   clickhouse:
-    image: artprod.dev.bloomberg.com/clickhouseinfra/external/docker.io/clickhouse/clickhouse-server:25.11
+    image: clickhouse/clickhouse-server:25.11
     environment:
       CLICKHOUSE_DB: ${CLICKHOUSE_DB:-odp}
       CLICKHOUSE_USER: ${CLICKHOUSE_USER:-default}
@@ -226,7 +226,7 @@ services:
   # --- Reverse Proxy ---
 
   traefik:
-    image: artprod.dev.bloomberg.com/bb-bbds/local/traefik:local
+    image: traefik:latest
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"

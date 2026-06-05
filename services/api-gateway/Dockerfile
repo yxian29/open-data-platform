@@ -1,8 +1,8 @@
-FROM artprod.dev.bloomberg.com/python3:3.12-rhel8
+FROM python:3.12-slim
 
 WORKDIR /app
 
-RUN yum install -y curl && yum clean all
+RUN apt-get update && apt-get install -y curl && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY services/api-gateway/pyproject.toml /app/
 RUN pip install --no-cache-dir .

@@ -3,7 +3,8 @@
     "allow": [
       "Bash(git fetch *)",
       "Bash(git reset *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(git push *)"
     ]
   }
 }
